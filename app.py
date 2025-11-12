@@ -4,7 +4,6 @@ import numpy as np
 from faker import Faker
 from datetime import datetime, timedelta
 from sklearn.mixture import GaussianMixture
-from sdv.tabular import CTGAN
 import string
 import random
 
