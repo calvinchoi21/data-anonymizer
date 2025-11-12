@@ -18,10 +18,10 @@ def is_discrete(series):
 def add_noise_to_numeric(series, noise_type="gaussian", scale=1.0, is_discrete_data=False):
     """Add noise to numeric data safely."""
     try:
-        series = pd.to_numeric(series, errors='coerce')  # Coerce invalid values to NaN
+        series = pd.to_numeric(series, errors='coerce')
         if series.isna().any():
             st.warning(f"⚠️ Some values in column were non-numeric and replaced with mean.")
-        series = series.fillna(series.mean())  # Replace NaNs with column mean
+        series = series.fillna(series.mean())
 
         if noise_type == "gaussian":
             noise = np.random.normal(0, scale * series.std(), size=len(series))
@@ -32,7 +32,6 @@ def add_noise_to_numeric(series, noise_type="gaussian", scale=1.0, is_discrete_d
         if is_discrete_data:
             result = np.round(result)
             result = np.maximum(result, series.min())
-
         return result
     except Exception as e:
         st.error(f"Error in add_noise_to_numeric: {str(e)}")
@@ -144,24 +143,11 @@ def main():
             st.sidebar.subheader("Column Configuration")
             column_configs = {}
 
+            # --- Return to Expander Layout ---
             for column in df.columns:
-                # Styled container for each column
-                with st.sidebar.container():
-                    st.markdown(
-                        f"""
-                        <div style="
-                            border: 1px solid #444;
-                            border-radius: 8px;
-                            padding: 12px;
-                            margin-bottom: 10px;
-                            background-color: #1e1e1e;">
-                        <h4 style="margin-top: 0; color: #f5f5f5;">{column}</h4>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
+                with st.sidebar.expander(f"⚙️ Configure {column}", expanded=False):
                     inferred_type = infer_column_type(df[column])
-                    st.write(f"Inferred type: {inferred_type}")
+                    st.caption(f"**Inferred type:** {inferred_type}")
 
                     col_type = st.selectbox(
                         f"Select type for {column}",
@@ -213,12 +199,11 @@ def main():
                             "type": col_type,
                             "max_shift": max_shift
                         }
+
                     else:
                         column_configs[column] = {"type": col_type}
 
-                    # Close div
-                    st.markdown("</div>", unsafe_allow_html=True)
-
+            # --- Anonymization Process ---
             if st.sidebar.button("Anonymize Data", type="primary"):
                 with st.spinner("Anonymizing data..."):
                     df_anon = df.copy()
